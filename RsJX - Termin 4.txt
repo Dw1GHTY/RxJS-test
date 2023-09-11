@@ -1,0 +1,93 @@
+***********pomenuti operatori*****************
+
+
+
+
+
+
+*************json-server***************** ==> https://www.npmjs.com/package/json-server
+
+- json-server: simulira REST API.
+
+- Kada radimo fetch sa nekog URL-a neka taj URL bude deo konfiguracije a ne u kodu.
+
+1) npm install json-server					//ne preporucuje se globalno (-g)
+
+2) "api": "json-server --watch <naziv_json_fajla>.json"		//!!!dodavanje skripte za pokretanje json-servera u package.json fajlu!!!
+
+3) npm run api							//pokretanje json-servera iz CLI
+
+
+
+//tip: podeli na tri terminala, jedan za live server, jedan za json server i jedan za ostalo
+
+
+
+**********primer za movie-db.json fetch. Ovo vraca samo response, ne podatke:*********
+
+const URL = "http://localhost:3000/movies/";
+
+function getMovie(title: string) {
+    fetch(URL + title).then(movie => {
+        console.log(movie);
+    })
+}
+
+getMovie("rambo");
+
+//db.json fajl koji nam sadrzi podatke, zajedno sa ostalima ide u poseban folder, npr "db".
+
+//304 -> the requested resource has not been modified since the last time it was loaded, and there's no need to transfer it again.
+
+
+
+************primer za movie-db.json sa parsiranim podacima:******************
+
+const URL = "http://localhost:3000/movies/";
+
+function getMovie(title: string) {
+    fetch(URL + title)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Movie not found!");
+            } else {
+                return response.json();
+            }
+        })
+        .catch(err => console.log(err))
+}
+
+getMovie("rocky");
+
+
+
+***********primer za movie-db.json sa Movie interfejsom gde se returnuje fetch:***************
+-------------------------------------------------
+export interface Movie {
+    id: string,
+    title: string,
+    year: number,
+    score: number
+}
+-------------------------------------------------
+const URL = "http://localhost:3000/movies/";
+
+function getMovie(title: string): Promise<Movie> {
+    return fetch(URL + title)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Movie not found!");
+            } else {
+                return response.json();
+            }
+        })
+        .catch(err => console.log(err))
+}
+
+getMovie("rocky");
+
+
+
+
+
+
