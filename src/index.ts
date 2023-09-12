@@ -10,24 +10,34 @@ import {
     Subject,
     fromEvent,
     sampleTime,
-    debounceTime
+    debounceTime,
+    from,
+    switchMap,
+    scan,
+    pairwise,
+    forkJoin,
+    combineLatest,
+    zip,
+    merge
 } from "rxjs";
-import { Movie } from "./movie";
 
-const URL = "http://localhost:3000/movies/";
+const first$ = interval(200).pipe(
+    map(x => "prvi-" + x),
+    take(5)
+)
 
-function getMovie(title: string): Promise<Movie> {
-    return fetch(URL + title)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Movie not found!");
-            } else {
-                return response.json();
-            }
-        })
-        .catch(err => console.log(err))
-}
+const second$ = interval(2000).pipe(
+    map(x => "drugi-" + x),
+    take(3)
+)
 
-getMovie("rocky");
+//forkJoin, combineLatest, zip
 
-//stao si na 31:15
+merge(first$, second$).subscribe(x => {
+    console.log('synced ', x)
+});
+
+
+
+
+

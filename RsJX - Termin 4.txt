@@ -1,7 +1,7 @@
-***********pomenuti operatori*****************
-
-
-
+***********pomenuti TRANSFORMACIONI operatori*****************
+- switchMap() - transformacioni operator koji prebacuje rad sa trenutnog toka na drugi. 
+- scan() - transformacioni operator, kao reduce, ima akumulator i vrednost, ali pamti poslednju dobijenu vrednost.
+- pairwise() - vrsi uparivanje svaka dva suseda niza u toku (1. sa 2.; 2. sa 3.; 3. sa 4.;...)
 
 
 
@@ -85,6 +85,169 @@ function getMovie(title: string): Promise<Movie> {
 }
 
 getMovie("rocky");
+
+
+*********pravljenje observable od fetch-a***************
+
+function getMovie(title: string): Observable<Movie> {
+    const promise = fetch(URL + title)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Movie not found!");
+            } else {
+                return response.json();
+            }
+        })
+        .catch(err => console.log(err))
+        return from(promise);
+}
+
+getMovie("rocky").subscribe(movie => console.log("film je: " + movie));
+
+//ovime je fetch upakovan u Observable i stoga postaje tok podataka.
+
+-----------------------------------------------------------------
+- prenos rezultata jednog toka na drugi:
+
+function createSuggestion(){
+    const inputEl = document.createElement("input");
+    document.body.appendChild(inputEl);
+    fromEvent(inputEl, "input").pipe(
+        debounceTime(1000),
+        map((ev: InputEvent) => (<HTMLInputElement>ev.target).value),		//preuzimanje teksta iz inputa
+        filter((txt: string) => txt.length > 2),
+        switchMap(title => getMovie(title))					/*prebacivanje rezultata jednog toga u drugi tok
+    ).subscribe(movie => console.log("result: ", movie));            		i prelazak na taj drugi tok preko switchMap()*/
+}
+
+createSuggestion();
+
+function getMovie(title: string): Observable<Movie> {
+    const promise = fetch(URL + title)					//fetch uvek vraca promise
+        .then(response => {
+            if (!response.ok) {
+                throw new Error("Movie not found!");
+            } else {
+                return response.json();
+            }
+        })
+        .catch(err => console.log(err))
+        return from(promise);
+}
+-----------------------------------------------------------------
+//inkrementalno sabiranje pozitivnih suseda niza:
+
+from([1, -2, 10, 4, -33, 25, 7]).pipe(
+    filter(x => x > 0),
+    scan((acc, value) => {
+        return acc + value;
+    })
+).subscribe(x => console.log(x));
+
+-----------------------------------------------------------------
+//uparivanje svih suseda u nizu bez istih parova:
+
+from([1, 2, 2, 2, 3, 3, 3]).pipe(
+    pairwise(),
+    filter(pair => pair[0] !== pair[1])
+).subscribe(x => console.log(x));
+
+************************KOMBINACIONI OPERATORI**************************
+
+
+*******************pomenuti KOMBINACIONI operatori**********************
+
+- forkJoin() - ceka da se svi tokovi kompletiraju, potom izbacuje poslednju vrednost svakog toka.
+
+- combineLatest() - pokrece se kada BILO KOJI od tokova emituje vrednost. 
+		    Ne krece dok svaki tok nema barem po jednu vrednost.
+
+- zip() - pokrece se tek kada SVAKI TOK emituje vrednost. Ako jedan stane onda se ceka da opet emituje da bi se zip pokrenuo.
+	  Takodje ne krece dok svaki tok nema barem po jednu vrednost.
+
+-merge() - od dva toka pravi jedan. Emituje vrednosti od svakog toka koji kako dolazi.
+--------------------------------------
+//primer forkJoin():
+
+const first$ = interval(500).pipe(
+    map(x => "prvi-" + x),
+    take(5)
+)
+
+const second$ = interval(1400).pipe(
+    map(x => "drugi-" + x),
+    take(3)
+)
+
+//forkJoin
+forkJoin([first$, second$]).subscribe(x => console.log('forkJoin ', x));
+
+---------------------------------
+//primer combineLatest():
+
+const first$ = interval(200).pipe(
+    map(x => "prvi-" + x),
+    take(5)
+)
+
+const second$ = interval(2000).pipe(
+    map(x => "drugi-" + x),
+    take(3)
+)
+
+//combineLatest
+
+combineLatest([first$, second$]).subscribe(x => {
+    console.log('synced ', x)
+});
+
+--------------------------------
+//primer zip:
+
+const first$ = interval(200).pipe(
+    map(x => "prvi-" + x),
+    take(5)
+)
+
+const second$ = interval(2000).pipe(
+    map(x => "drugi-" + x),
+    take(3)
+)
+
+//zip
+
+zip([first$, second$]).subscribe(x => {
+    console.log('synced ', x)
+});
+
+-------------------------------
+//primer merge:
+
+const first$ = interval(200).pipe(
+    map(x => "prvi-" + x),
+    take(5)
+)
+
+const second$ = interval(2000).pipe(
+    map(x => "drugi-" + x),
+    take(3)
+)
+
+//merge
+
+merge(first$, second$).subscribe(x => {		//<=== nije niz 
+    console.log('synced ', x)
+});
+-----------------------------
+
+
+
+
+
+
+
+
+
 
 
 
