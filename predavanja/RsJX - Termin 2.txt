@@ -1,0 +1,88 @@
+
+
+//obicna asinhrona funkcija
+function getRandomNumber(cb?: Function) {
+    setTimeout(() => {
+        console.log("Rand: " + Math.round(Math.random() * 10));
+        if (typeof cb !== 'undefined') {
+            cb();
+        }
+    }, 1500);
+}
+
+//ovo je callback hell
+/* getRandomNumber(
+    () => getRandomNumber(
+        () => getRandomNumber(
+            getRandomNumber
+        )
+    )
+);
+
+console.log("ende"); */
+
+
+
+//**********PREKO PROMISE-a ********** | <number> oznacava da je povratna vrednost broj
+function getRandomNumber2() {
+    const p = new Promise<number>((resolve, reject) => {	//resolve -> sta promise vraca, reject -> odbijanje kada naidje na gresku
+        setTimeout(() => {
+            const n = Math.round(Math.random() * 10)
+            if (n < 1) {
+                reject("Broj je manji od 3");
+            } else {
+                resolve(n);
+            }
+        }, Math.random() * 2000);
+    });
+    return p;
+}
+
+/* getRandomNumber2()
+    .then((x: number) => {
+        console.log("1.: " + x);
+        return getRandomNumber2();
+    })
+    .then((x: number) => {
+        console.log("2.: " + x);
+        return getRandomNumber2();
+    })
+    .then((x: number) => {
+        console.log("3.: " + x);
+        return getRandomNumber2();
+    })
+    .then((x: number) => {
+        console.log("4.: " + x);
+        return getRandomNumber2();
+    })
+    .catch(reason => {
+        console.log("Javila se greska, " + reason);
+    })
+ */
+	//prvi poziv getRandomNumber2() vraca Promise objekat (return p).
+	//na njega se poziva then (sto ne bi moglo da nije Promise objekat).
+	//then ga console.log-uje i u return poziva getRandomNumber2 koji opet vraca Promise objekat
+	//nad kojim se dalje poziva then.
+
+//**********PREKO ASYNC AWAIT**************
+async function main() {
+    try {
+        for (let i = 0; i < 4; i++) {
+            const broj = await getRandomNumber2();
+            console.log("Iz main-a " + broj);
+        }
+    }
+    catch (e) {
+        console.warn("Javila se greska: " + e);
+    }
+}
+main();
+
+
+//*******PROMISE ALL**********/
+Promise.all([ //u slucaju da treba iz vise izvora da se preuzmu podaci, Promise.all daje signal kada je sve gotovo i salje
+    getRandomNumber2(),
+    getRandomNumber2(),
+    getRandomNumber2(),
+    getRandomNumber2()
+]).then(array => console.log("brojevi: ", array));

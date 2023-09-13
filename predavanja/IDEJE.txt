@@ -1,0 +1,25 @@
+**********Aplikacija za donacije**********
+
+-Korisnici subscribeuju na odredjenu donaciju koja prilikom donacije 
+upisuje u sumu do potrebne za dostizanje cilja.
+
+-Reaktivno je u smislu da ce subscriebovan korisnik/klijent 
+videti uzivo promenu na ekranu i dodavanje na sumu do cilja.
+
+_______________________________________________________________________________________
+
+**********Weather app*************
+
+-Samo se prikupljaju informacije fetch-om sa weather API-ja,
+tako da aplikacija bude azurna u isto vreme kada se promeni prognoza.
+
+_______________________________________________________________________________________
+
+
+**********Rezervacije za Bioskop/Stadion...**********
+
+-Uzivo azuriranje grafickog prikaza broja slobodnih mesta u objektu
+u kome se rezervise.
+
+_______________________________________________________________________________________
+

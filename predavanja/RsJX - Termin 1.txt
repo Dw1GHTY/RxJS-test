@@ -1,0 +1,93 @@
+************************************************  TOOLING  *********************************************************************
+
+*************NPM*****************************
+
+1) npm init -> kreiranje projekta; sve ostaviti defaultno
+
+pravilno je da se source kod stavlja u "src" a output fajlovi u "dist" (rucno kreirati "src", "dist" ce se kreirati kasnije automatski)
+
+svi paketi se stavljaju automatski u "dist" folder zbog bundle-ovanja (da se ne bi ucitavalo vise od jedanput)
+
+*************WEBPACK*************************
+
+webpack -> bundleuje/spakuje sve asset-e u jedan fajl, da se ne bi slalo mnogo http zahteva, vec samo jedan. //Kao dll u c#
+
+2) npm install webpack webpack-cli --save-dev -> --save-dev je dependency koji snima npm pakete samo za developement namene
+
+npx -> pokrece paket odmah, ako ga nema, skine ga pa ga pokrene (node package execute)
+
+Obratiti paznju na package.json i package-lock.json,
+jer ako nesto ne radi na drugom racunaru, to je verovatno
+zbog verzija (^ - trazi najnoviju, bez ^ ostaje trenutno definisana verzija) paketa.
+
+3) npx webpack -> svaki put kad promenimo kod, ova komanda opet "ubundleuje"
+
+4) webpack.config.js:
+
+const path = require('path');
+
+module.exports = {
+    entry: './src/index.ts',		//<---entry point odakle krece da gleda zavisnosti
+    devtool: 'inline-source-map',	//<---za source mape prilikom bundle-ovanja (da imas kod u debageru za debagovanjee)
+    module: {
+        rules: [
+            {            
+                test: /\.tsx?$/,		//<----da bi osposobili "pakovanje" jpg, svg... fajlova, mora se dodati novo pravilo,
+                use: 'ts-loader',		//tj. ovde se nalaze loaderi kojima se kaze kako da prepakuju razlicite fajlove
+                exclude: /node_modules/,
+            },
+        ],
+    },
+    resolve: {
+        extensions: ['.tsx', '.ts', '.js'],
+    },
+    output: {
+        filename: 'bundle.js',
+        path: path.resolve(__dirname, 'dist'),
+    },
+};
+
+Dalje da bi u debageru mogli da vidimo source kod radi debagovanja, dodaje se u fajlu webpack.config.js SourceMap kod, ispod "output":
+5) devtool: 'inline-source-map',  (dodato vec iznad)
+Source kodu u debageru se moze pristupiti na F12 -> >> -> Sources
+
+u package.json, u scripts, dodati:
+6) "build": "webpack"
+potom u konzoli:
+7) npm run build
+radi kompajlovanja - skripta moze biti nazvana kako god, a da bi se pokrenula pise se u terminalu: 
+npm run "<ime_skripte>"
+
+u package.json, pod scripts, dodati:
+8)"watch": "webpack --watch" -> watch mod radi non-stop i na svaku promenu fajla builduje "dist"
+potom u konzoli:
+9) npm run watch -> isto kao i u react, CTRL+C da se iskljuci watch mode.
+
+//sidenote: ES6 pri prevodjenu koristi klase ; ES5 pri prevodjenju koristi IIFE funkcije
+
+**************TS*****************************
+//Kod Angular-a sve je sredjeno
+
+10) npm install --save-dev typescript ts-loader -> ts-loader povezuje webpack sa TS (koristi TSC -> typescritpt compiler)
+webpack treba da zna kako da handle-uje TS fajlove
+
+11)tsconfig.js:
+
+{
+    "compilerOptions": {
+        "outDir": "./dist/",
+        "noImplicitAny": true,
+        "module": "es6",
+        "target": "es5",
+        "jsx": "react",
+        "allowJs": true,
+        "sourceMap": true,
+        "moduleResolution": "node"
+    }
+}
+
+
+
+
+********************LINKOVI******************
+https://webpack.js.org/guides/typescript/
